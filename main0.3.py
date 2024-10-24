@@ -98,7 +98,7 @@ else:
 				chance = input("Enter chance for corruption... (will default to 10) ")
 				if chance == "":
 					chance = 10
-				cpercent = input("Enter amount of packet to corrupt (will default to 5)...")
+				cpercent = int(input("Enter amount of packet to corrupt (will default to 5)..."))
 				if cpercent == "":
 					cpercent = 5
 				with p.WinDivert(preset) as w:
