@@ -5,7 +5,7 @@ import pydivert as p
 import random
 import threading
 # Amulet 0.3 source, much less scuffed.
-
+sys.setrecursionlimit(2147483647)
 # Admin Check
 if not ctypes.windll.shell32.IsUserAnAdmin():
 	warn("Program will not run if not admin.")
