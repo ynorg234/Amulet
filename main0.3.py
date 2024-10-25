@@ -104,22 +104,22 @@ else:
 					cpercent = 5
 				with p.WinDivert(preset) as w:
 					for packet in w:
-						if rc(chance):
-							og = packet.payload
-							l = len(og)
-							if rc(50):
-								packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in range(l - round(l * cpercent/100))), 'utf-8')
-							else:
-								packet.payload = bytes(''.join(random.choice(og) for _ in range(l - round(l * cpercent/100))))+og[round(l * cpercent/100):]
-							if len(packet.payload) == l:
-								w.send(packet)
-								print(f"Sucessfully corrupted {cpercent}% of packet.")
-							else:
-								print("Failed! Data lost in corruption!")
-								w.send(og)
-						else:
-							print(f"Ignoring packet, {chance}% chance for corrupting...")
-							w.send(packet)
+                                                try:
+                                                        if rc(chance):
+                                                                og = packet.payload
+                                                                l = len(og)
+                                                                packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in range(l - round(l * cpercent/100))), 'utf-8')
+                                                                if len(packet.payload) == l:
+                                                                        w.send(packet)
+                                                                        print(f"Sucessfully corrupted {cpercent}% of packet.")
+                                                                else:
+                                                                        print("Failed! Data lost in corruption!")
+                                                                        w.send(og)
+                                                        else:
+                                                                print(f"Ignoring packet, {chance}% chance for corrupting...")
+                                                                w.send(packet)
+                                                except:
+                                                        print("packet error hmmm")
 
 
 
