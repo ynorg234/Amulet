@@ -108,9 +108,9 @@ else:
 							og = packet.payload
 							l = len(og)
 							if rc(50):
-                                                                packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in  range(l - round(l * cpercent/100))), 'utf-8')
-                                                        else:
-                                                                packet.payload = bytes(''.join(random.choice(str(og)) for _ in  range(round(l * cpercent/100)), 'utf-8')+og[round(l * cpercent/100):]
+								packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in range(l - round(l * cpercent/100))), 'utf-8')
+							else:
+								packet.payload = bytes(''.join(random.choice(og) for _ in range(l - round(l * cpercent/100))))+og[round(l * cpercent/100):]
 							if len(packet.payload) == l:
 								w.send(packet)
 								print(f"Sucessfully corrupted {cpercent}% of packet.")
