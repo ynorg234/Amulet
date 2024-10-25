@@ -5,7 +5,7 @@ import pydivert as p
 import random
 import threading
 # Amulet 0.3 source, much less scuffed.
-sys.setrecursionlimit(2147483647)
+__import__("sys").setrecursionlimit(2147483647)
 # Admin Check
 if not ctypes.windll.shell32.IsUserAnAdmin():
 	warn("Program will not run if not admin.")
@@ -62,9 +62,9 @@ else:
 							if threading.active_count() == int(maxThreads):
 								for t in pcs:
 									t.join()
-							else:
-								w.send(packet)
-								print(f"Ignoring packet, {chance}% chance of packet lag")
+						else:
+							w.send(packet)
+							print(f"Ignoring packet, {chance}% chance of packet lag")
 
 			if choice == "D" or choice == "d":
 				chance = input("Enter chance for dropping... (will default to 50) ")
@@ -78,6 +78,7 @@ else:
 							print("Dropped packet")
 						else:
 							print(f"Ignoring packet, {chance}% chance of dropping")
+							w.send(packet)
 			if choice == "X2" or choice == "x2":
 				chance = input("Enter chance for duping... (will default to 50) ")
 				if chance == "":
@@ -106,12 +107,15 @@ else:
 						if rc(chance):
 							og = packet.payload
 							l = len(og)
-							packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in  range(l - round(l * cpercent/100))), 'utf-8')
+							if rc(50):
+                                                                packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in  range(l - round(l * cpercent/100))), 'utf-8')
+                                                        else:
+                                                                packet.payload = bytes(''.join(random.choice(str(og)) for _ in  range(round(l * cpercent/100)), 'utf-8')+og[round(l * cpercent/100):]
 							if len(packet.payload) == l:
 								w.send(packet)
 								print(f"Sucessfully corrupted {cpercent}% of packet.")
 							else:
-								print("Failed!")
+								print("Failed! Data lost in corruption!")
 								w.send(og)
 						else:
 							print(f"Ignoring packet, {chance}% chance for corrupting...")
