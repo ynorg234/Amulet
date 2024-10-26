@@ -72,12 +72,12 @@ else:
 					chance = 50
 				with p.WinDivert(preset) as w:
 					for packet in w:
-						if rc(chance):
+						if rc(chance) and packet.payload != None:
 							packet.payload = b""
 							w.send(packet)
 							print("Dropped packet")
 						else:
-							print(f"Ignoring packet, {chance}% chance of dropping")
+							print(f"Ignoring packet, {chance}% chance of dropping, or there is nothing to drop.")
 							w.send(packet)
 			if choice == "X2" or choice == "x2":
 				chance = input("Enter chance for duping... (will default to 50) ")
@@ -99,27 +99,26 @@ else:
 				chance = input("Enter chance for corruption... (will default to 10) ")
 				if chance == "":
 					chance = 10
-				cpercent = int(input("Enter amount of packet to not corrupt (will default to 5)..."))
+				cpercent = input("Enter amount of packet to not corrupt (will default to 75)...")
 				if cpercent == "":
-					cpercent = 5
+					cpercent = 75
+				cpercent = int(cpercent)
 				with p.WinDivert(preset) as w:
 					for packet in w:
-                                                try:
-                                                        if rc(chance):
-                                                                og = packet.payload
-                                                                l = len(og)
-                                                                packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in range(l - round(l * cpercent/100))), 'utf-8')
-                                                                if len(packet.payload) == l:
-                                                                        w.send(packet)
-                                                                        print(f"Sucessfully corrupted {cpercent}% of packet.")
-                                                                else:
-                                                                        print("Failed! Data lost in corruption!")
-                                                                        w.send(og)
-                                                        else:
-                                                                print(f"Ignoring packet, {chance}% chance for corrupting...")
+                                                if rc(chance) and packet.payload != None:
+                                                        og = packet.payload
+                                                        l = len(og)
+                                                        packet.payload = og[:round(l * cpercent/100)]+bytes(''.join(random.choice(str(og)) for _ in range(l - round(l * cpercent/100))), 'utf-8')
+                                                        if len(packet.payload) == l:
                                                                 w.send(packet)
-                                                except:
-                                                        print("packet error hmmm")
+                                                                print(f"Sucessfully left {cpercent}% of packet, and corrupted the rest.")
+                                                        else:
+                                                                print("Failed! Data lost in corruption!")
+                                                                w.send(og)
+                                                else:
+                                                        print(f"Ignoring packet, {chance}% chance for corrupting, or there is nothing to corrupt.")
+                                                        w.send(packet)
+
 
 
 
