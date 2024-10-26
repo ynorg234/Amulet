@@ -10,3 +10,6 @@ Step 2: Run as Administrator
 
 Step 3: Enjoy the intense lag...
 
+# Latest update realtext
+
+ózàýæ\wb|ÆÃZUNM÷
