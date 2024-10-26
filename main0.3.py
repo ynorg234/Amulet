@@ -45,10 +45,15 @@ else:
 				chance = input("Enter chance here... (will default to 50) ")
 				if chance == "":
 					chance = 50
-				delay = input("Enter delay... (in milliseconds) ")
+				chance = int(chance)
+				delay = input("Enter delay... (in milliseconds, will default to 25) ")
+				if delay == "":
+					delay = 25
+				delay = int(delay)
 				maxThreads = input("Enter maximum threads for lag (will default to 5)... ")
 				if maxThreads == "":
 					maxThreads = 5
+				maxThreads = int(maxThreads)
 				with p.WinDivert(preset) as w:
 					def sendlag():
 						time.sleep(int(delay)/1000)
@@ -70,6 +75,7 @@ else:
 				chance = input("Enter chance for dropping... (will default to 50) ")
 				if chance == "":
 					chance = 50
+				chance = int(chance)
 				with p.WinDivert(preset) as w:
 					for packet in w:
 						if rc(chance) and packet.payload != None:
