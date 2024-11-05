@@ -39,6 +39,7 @@ else:
 			print("Drop: D")
 			print("Duplicate: X2")
 			print("Tamper: T?")
+			print("Out of order: O?")
 			choice = input("Enter choice here: ")
 			if choice == "L" or choice == "l":
 				clear()
@@ -124,11 +125,30 @@ else:
                                                 else:
                                                         print(f"Ignoring packet, {chance}% chance for corrupting, or there is nothing to corrupt.")
                                                         w.send(packet)
-
-
-
-
-
-
-	if __name__ == "__main__":
+			if choice == "o?" or choice == "O?": #type: ignore
+				chance = input("Enter chance for packet shuffling... (default is 25) ")
+				if chance == "":
+					chance = 25
+				chance = int(chance)
+				with p.WinDivert(preset) as w:
+					packetlist = []
+					for packet in w:
+						if rc(chance):
+							packetlist.append(packet)
+							randnum = random.randint(0, len(packetlist) - 1)
+							w.send(packetlist[randnum])
+							if len(packetlist) == 500:
+								#takes a lil
+								for _ in range(250):
+									packetlist.pop()
+							print(f"Sent packet #{randnum}")
+						else:
+							packetlist.append(packet)
+							w.send(packet)
+							if len(packetlist) == 500:
+								#takes a lil
+								for _ in range(250):
+									packetlist.pop()
+							print(f"Ignoring packet, {chance}% chance of packet shuffling...")
+	if __name__ == "__main__": #type: ignore
 		main()
