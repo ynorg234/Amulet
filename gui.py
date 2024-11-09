@@ -196,25 +196,21 @@ class App1(wx.Frame):
         if chance == "":
             chance = 10
         chance = int(chance)
+        threadlist = []
         with p.WinDivert(preset) as w:
+            def sendjitter():
+                time.sleep(delay/1000)
+                w.send(packet)
             for packet in w:
                 if self.rc(chance):
                     delay = random.randint(0, timeframe)
-                    time.sleep(delay/1000)
-                    w.send(packet)
-                    print(f"Delayed packet by {delay} seconds while being in a {timeframe} timeframe.")
+                    threadlist.append(threading.Thread(sendjitter))
+                    threadlist[len(threadlist) - 1].start()
+                    if len(threadlist) == 5:
+                        for t in threadlist:
+                            t.join()
+                    print("Started Thread for Jitter")
+                    print(f"Delayed packet by {delay} milliseconds while being in a {timeframe} ms timeframe.")
                 else:
                     w.send(packet)
                     print(f"Ignoring packet, {chance}% chance for jitter...")
-
-
-
-
-
-
-
-
-if __name__ == "__main__": #and ctypes.windll.shell32.IsUserAnAdmin():
-    app = wx.App(False)
-    frame = App1(None, "Amulet 0.4 RELEASE")
-    app.MainLoop()
