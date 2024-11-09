@@ -144,7 +144,7 @@ class App1(wx.Frame):
             preset = "((ip and ip.Length<=1500) or (ipv6 and ipv6.Length<=1500))"
         with p.WinDivert(preset) as w:
             for packet in w:
-                if self.rc(chance):
+                if self.rc(chance) and packet.payload != None:
                     og = packet.payload
                     l = len(og)
                     packet.payload = og[:round(l * leave/100)]+bytes(''.join(random.choice(str(og)) for _ in range(l - round(l * leave/100))), 'utf-8')
@@ -214,3 +214,15 @@ class App1(wx.Frame):
                 else:
                     w.send(packet)
                     print(f"Ignoring packet, {chance}% chance for jitter...")
+
+
+
+
+
+
+
+
+if __name__ == "__main__": #and ctypes.windll.shell32.IsUserAnAdmin():
+    app = wx.App(False)
+    frame = App1(None, "Amulet 0.4 RELEASE")
+    app.MainLoop()
