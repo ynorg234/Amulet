@@ -48,9 +48,15 @@ class App1(wx.Frame):
         self.Button4.Bind(wx.EVT_BUTTON, self.shuffle)
         self.Entry9 = wx.TextCtrl(panel, size=(50, 20), pos=(183, 201))
         self.Entry9.SetHint("Chance")
+        self.Button5 = wx.Button(panel, wx.ID_CLEAR, "Jitter", pos=(99, 225))
+        self.Button5.Bind(wx.EVT_BUTTON, self.jitter)
+        self.Entry10 = wx.TextCtrl(panel, size=(50, 20), pos=(177, 226))
+        self.Entry10.SetHint("TimeF...")
+        self.Entry11 = wx.TextCtrl(panel, size=(50, 20), pos=(177+55, 226))
+        self.Entry11.SetHint("Chance")
     def rc(self, percent):
 	    return True if percent == 100 else False if percent == 0 else True if float(random.random()) < float(int(percent)/100) else False
-    def lag(self, e): #type: ignore
+    def lag(self, e=None): #type: ignore
         pcs = []
         preset = self.input.GetValue()
         if preset == "":
@@ -81,9 +87,10 @@ class App1(wx.Frame):
                         for t in pcs:
                             t.join()
                 else:
+                     
                     w.send(packet)
                     print(f"Ignoring packet, {chance}% chance of packet lag")
-    def drop(self, e):
+    def drop(self, e=None):
         preset = self.input.GetValue()
         if preset == "":
             preset = "((ip and ip.Length<=1500) or (ipv6 and ipv6.Length<=1500))"
@@ -98,9 +105,10 @@ class App1(wx.Frame):
                     w.send(packet)
                     print("Dropped Packet")
                 else:
+                     
                     w.send(packet)
                     print(f"Ignoring packet, {chance}% chance of packet loss")
-    def dupe(self, e):
+    def dupe(self, e=None):
         preset = self.input.GetValue()
         if preset == "":
             preset = "((ip and ip.Length<=1500) or (ipv6 and ipv6.Length<=1500))"
@@ -119,9 +127,10 @@ class App1(wx.Frame):
                         w.send(packet)
                     print(f"Duplicated packet {copies} time(s).")
                 else:
+                     
                     w.send(packet)
                     print(f"Ignoring packet, {chance}% chance for packet duplication.")
-    def corrupt(self, e):
+    def corrupt(self, e=None):
         leave = self.Entry7.GetValue()
         if leave == "":
             leave = 75
@@ -148,8 +157,10 @@ class App1(wx.Frame):
                         packet.payload = og
                         w.send(packet)
                 else:
+                     
+                    w.send(packet)
                     print(f"Ignoring packet, {chance}% chance for corruption.")
-    def shuffle(self, e):
+    def shuffle(self, e=None):
         preset = self.input.GetValue()
         if preset == "":
             preset = "((ip and ip.Length<=1500) or (ipv6 and ipv6.Length<=1500))"
@@ -165,16 +176,36 @@ class App1(wx.Frame):
                     randnum = random.randint(0, len(packetlist) - 1)
                     w.send(packetlist[randnum])
                     if len(packetlist) == 500:
-                        for _ in range(250):
-                            packetlist.pop()
+                        del packetlist[:250]
                     print(f"Sent packet #{randnum}")
                 else:
                     packetlist.append(packet)
                     w.send(packet)
                     if len(packetlist) == 500:
-                        for _ in range(250):
-                            packetlist.pop()
+                        del packetlist[:250]
                     print(f"Ignoring packet, {chance}% chance for packet shuffling.")
+    def jitter(self, e=None):
+        preset = self.input.GetValue()
+        if preset == "":
+            preset = "((ip and ip.Length<=1500) or (ipv6 and ipv6.Length<=1500))"
+        timeframe = self.Entry10.GetValue()
+        if timeframe == "":
+            timeframe = 50
+        timeframe = int(timeframe)
+        chance = self.Entry11.GetValue()
+        if chance == "":
+            chance = 10
+        chance = int(chance)
+        with p.WinDivert(preset) as w:
+            for packet in w:
+                if self.rc(chance):
+                    delay = random.randint(0, timeframe)
+                    time.sleep(delay/1000)
+                    w.send(packet)
+                    print(f"Delayed packet by {delay} seconds while being in a {timeframe} timeframe.")
+                else:
+                    w.send(packet)
+                    print(f"Ignoring packet, {chance}% chance for jitter...")
 
 
 
@@ -183,7 +214,7 @@ class App1(wx.Frame):
 
 
 
-if __name__ == "__main__" and ctypes.windll.shell32.IsUserAnAdmin():
+if __name__ == "__main__": #and ctypes.windll.shell32.IsUserAnAdmin():
     app = wx.App(False)
     frame = App1(None, "Amulet 0.4 RELEASE")
     app.MainLoop()
