@@ -40,7 +40,7 @@ class App1(wx.Frame):
         self.Button3.Show(True)
         self.Button3.Bind(wx.EVT_BUTTON, self.corrupt)
         self.Entry7 = wx.TextCtrl(panel, size=(50, 20), pos=(177, 176))
-        self.Entry7.SetHint("Leave%")
+        self.Entry7.SetHint("Corrupt%")
         self.Entry8 = wx.TextCtrl(panel, size=(50, 20), pos=(177+55, 176))
         self.Entry8.SetHint("Chance")
         self.Button4 = wx.Button(panel, wx.ID_CLEAR, "Out of Order", pos=(93, 200))
@@ -54,6 +54,12 @@ class App1(wx.Frame):
         self.Entry10.SetHint("TimeF...")
         self.Entry11 = wx.TextCtrl(panel, size=(50, 20), pos=(177+55, 226))
         self.Entry11.SetHint("Chance")
+        self.Button6 = wx.Button(panel, wx.ID_CLEAR, "Partial Loss", pos=(97, 250))
+        self.Button6.Bind(wx.EVT_BUTTON, self.partloss)
+        self.Entry12 = wx.TextCtrl(panel, size=(50, 20), pos=(180, 251))
+        self.Entry12.SetHint("Drop%")
+        self.Entry13 = wx.TextCtrl(panel, size=(50, 20), pos=(180+55, 251))
+        self.Entry13.SetHint("Chance")
     def rc(self, percent):
 	    return True if percent == 100 else False if percent == 0 else True if float(random.random()) < float(int(percent)/100) else False
     def lag(self, e=None): #type: ignore
@@ -133,8 +139,8 @@ class App1(wx.Frame):
     def corrupt(self, e=None):
         leave = self.Entry7.GetValue()
         if leave == "":
-            leave = 75
-        leave = int(leave)
+            leave = 25
+        leave = 100 - int(leave)
         chance = self.Entry8.GetValue()
         if chance == "":
             chance = 10
@@ -214,6 +220,29 @@ class App1(wx.Frame):
                 else:
                     w.send(packet)
                     print(f"Ignoring packet, {chance}% chance for jitter...")
+    def partloss(self, e=None):
+        preset = self.input.GetValue()
+        if preset == "":
+            preset = "((ip and ip.Length<=1500) or (ipv6 and ipv6.Length<=1500))"
+        drop = self.Entry12.GetValue()
+        if drop == "":
+            drop = 25
+        drop = 100 - int(drop)
+        chance = self.Entry13.GetValue()
+        if chance == "":
+            chance = 10
+        chance = int(chance)
+        with p.WinDivert(preset) as w:
+            for packet in w:
+                if self.rc(chance) and packet.payload != None:
+                    packet.payload = packet.payload[:round(len(packet.payload) * drop/100)]
+                    w.send(packet)
+                    print(f"Kept {100 - drop}% of packet, where's the rest?")
+                else:
+                    w.send(packet)
+                    print(f"Ignoring packet, {chance}% chance for packet disintegration")
+
+        #packet.payload = og[:round(l * leave/100)]
 
 
 
